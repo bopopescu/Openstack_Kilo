@@ -210,7 +210,7 @@ class HaRouter(router.RouterInfo):
                         default_gw, gw_ip, interface_name))
 
     def _should_delete_ipv6_lladdr(self, ipv6_lladdr):
-        """Only the master should have any IP addresses configured.
+        """Only the main should have any IP addresses configured.
         Let keepalived manage IPv6 link local addresses, the same way we let
         it manage IPv4 addresses. In order to do that, we must delete
         the address first as it is autoconfigured by the kernel.
@@ -226,7 +226,7 @@ class HaRouter(router.RouterInfo):
     def _disable_ipv6_addressing_on_interface(self, interface_name):
         """Disable IPv6 link local addressing on the device and add it as
         a VIP to keepalived. This means that the IPv6 link local address
-        will only be present on the master.
+        will only be present on the main.
         """
         device = ip_lib.IPDevice(interface_name, namespace=self.ns_name)
         ipv6_lladdr = ip_lib.get_ipv6_lladdr(device.link.address)
@@ -320,7 +320,7 @@ class HaRouter(router.RouterInfo):
         addresses = ha_device.addr.list()
         cidrs = (address['cidr'] for address in addresses)
         ha_cidr = self._get_primary_vip()
-        state = 'master' if ha_cidr in cidrs else 'backup'
+        state = 'main' if ha_cidr in cidrs else 'backup'
         self.ha_state = state
         callback(self.router_id, state)
 

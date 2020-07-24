@@ -324,7 +324,7 @@ class L3AgentTestCase(L3AgentTestFramework):
             self.agent, 'enqueue_state_change').start()
         router_info = self.generate_router_info(enable_ha=True)
         router = self.manage_router(self.agent, router_info)
-        utils.wait_until_true(lambda: router.ha_state == 'master')
+        utils.wait_until_true(lambda: router.ha_state == 'main')
 
         self.fail_ha_router(router)
         utils.wait_until_true(lambda: router.ha_state == 'backup')
@@ -332,7 +332,7 @@ class L3AgentTestCase(L3AgentTestFramework):
         utils.wait_until_true(lambda: enqueue_mock.call_count == 3)
         calls = [args[0] for args in enqueue_mock.call_args_list]
         self.assertEqual((router.router_id, 'backup'), calls[0])
-        self.assertEqual((router.router_id, 'master'), calls[1])
+        self.assertEqual((router.router_id, 'main'), calls[1])
         self.assertEqual((router.router_id, 'backup'), calls[2])
 
     def _expected_rpc_report(self, expected):
@@ -355,7 +355,7 @@ class L3AgentTestCase(L3AgentTestFramework):
         router2 = self.manage_router(self.agent, router_info)
 
         utils.wait_until_true(lambda: router1.ha_state == 'backup')
-        utils.wait_until_true(lambda: router2.ha_state == 'master')
+        utils.wait_until_true(lambda: router2.ha_state == 'main')
         utils.wait_until_true(
             lambda: self._expected_rpc_report(
                 {router1.router_id: 'standby', router2.router_id: 'active'}))
@@ -576,7 +576,7 @@ class L3AgentTestCase(L3AgentTestFramework):
             interface_name = router.get_external_device_name(port['id'])
             self._assert_no_ip_addresses_on_interface(router.ns_name,
                                                       interface_name)
-            utils.wait_until_true(lambda: router.ha_state == 'master')
+            utils.wait_until_true(lambda: router.ha_state == 'main')
 
             # Keepalived notifies of a state transition when it starts,
             # not when it ends. Thus, we have to wait until keepalived finishes
@@ -754,14 +754,14 @@ class L3HATestFramework(L3AgentTestFramework):
                 return_value=ns_name).start()
         router2 = self.manage_router(self.failover_agent, router_info_2)
 
-        utils.wait_until_true(lambda: router1.ha_state == 'master')
+        utils.wait_until_true(lambda: router1.ha_state == 'main')
         utils.wait_until_true(lambda: router2.ha_state == 'backup')
 
         device_name = router1.get_ha_device_name()
         ha_device = ip_lib.IPDevice(device_name, namespace=router1.ns_name)
         ha_device.link.set_down()
 
-        utils.wait_until_true(lambda: router2.ha_state == 'master')
+        utils.wait_until_true(lambda: router2.ha_state == 'main')
         utils.wait_until_true(lambda: router1.ha_state == 'backup')
 
 

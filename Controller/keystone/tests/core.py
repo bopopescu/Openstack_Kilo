@@ -136,7 +136,7 @@ def checkout_vendor(repo, rev):
             utils.git('clone', repo, revdir)
 
         os.chdir(revdir)
-        utils.git('checkout', '-q', 'master')
+        utils.git('checkout', '-q', 'main')
         utils.git('pull', '-q')
         utils.git('checkout', '-q', rev)
 

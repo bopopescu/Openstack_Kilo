@@ -101,7 +101,7 @@ class AgentMixin(object):
         state_change_server.run()
 
     def _calculate_batch_duration(self):
-        # Slave becomes the master after not hearing from it 3 times
+        # Subordinate becomes the main after not hearing from it 3 times
         detection_time = self.conf.ha_vrrp_advert_int * 3
 
         # Keepalived takes a couple of seconds to configure the VIPs
@@ -125,7 +125,7 @@ class AgentMixin(object):
                          'possibly deleted concurrently.'), router_id)
             return
 
-        if state == 'master':
+        if state == 'main':
             LOG.debug('Spawning metadata proxy for router %s', router_id)
             self.metadata_driver.spawn_monitored_metadata_proxy(
                 self.process_monitor, ri.ns_name, self.conf.metadata_port,
@@ -136,7 +136,7 @@ class AgentMixin(object):
                 self.process_monitor, ri.router_id, ri.ns_name, self.conf)
 
     def notify_server(self, batched_events):
-        translation_map = {'master': 'active',
+        translation_map = {'main': 'active',
                            'backup': 'standby',
                            'fault': 'standby'}
         translated_states = dict((router_id, translation_map[state]) for
